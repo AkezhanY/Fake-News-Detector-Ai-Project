@@ -33,7 +33,7 @@ Clone the repository:
 
 bash
 
-git clone https://github.com/your_username/truthguard-ai.git
+git clone https://github.com/AkezhanY/Fake-News-Detector-Ai-Project/tree/main
 
 cd truthguard-ai
 
