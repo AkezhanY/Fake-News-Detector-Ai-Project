@@ -1,0 +1,180 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>AI Training - Fake News Detector</title>
+    <link rel="stylesheet" href="/static/style.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+</head>
+<body>
+    <div class="training-container">
+        <div class="training-header">
+            <h1>🎯 Train Fake News Detector</h1>
+            <a href="/" class="back-button">
+                <i class="fas fa-arrow-left"></i>
+                Back to Chat
+            </a>
+        </div>
+        
+        <div class="training-stats">
+            <h3>Training Statistics</h3>
+            <p>Total examples: <span id="totalCount">0</span></p>
+            <p>Fake news: <span id="fakeCount">0</span></p>
+            <p>Real news: <span id="realCount">0</span></p>
+            <p><small>The AI needs at least 20-30 examples to start learning effectively</small></p>
+        </div>
+
+        <div id="trainingInterface">
+            <h3>Add News for Training:</h3>
+            <textarea id="newsText" rows="4" placeholder="Enter news text here... Example: 'Scientists discovered amazing cure that doctors don't want you to know about'" style="width: 100%; padding: 1rem; border: 1px solid var(--border-color); border-radius: 0.5rem; background: var(--chat-bg); color: var(--text-primary);"></textarea>
+            <div style="margin-top: 1rem; display: flex; gap: 1rem;">
+                <button onclick="classifyNews(true)" class="fake-btn" style="background: #ef4444; color: white; border: none; padding: 1rem 2rem; border-radius: 0.5rem; cursor: pointer; font-weight: bold;">
+                    ❌ Mark as FAKE
+                </button>
+                <button onclick="classifyNews(false)" class="real-btn" style="background: #10b981; color: white; border: none; padding: 1rem 2rem; border-radius: 0.5rem; cursor: pointer; font-weight: bold;">
+                    ✅ Mark as REAL
+                </button>
+            </div>
+        </div>
+
+        <div id="existingData" style="margin-top: 3rem;">
+            <h3>Training Data Examples:</h3>
+            <div id="newsList"></div>
+        </div>
+    </div>
+
+    <script>
+        // Load existing data when page loads
+        document.addEventListener('DOMContentLoaded', loadTrainingData);
+
+        async function loadTrainingData() {
+            try {
+                const response = await fetch('/training-data');
+                const data = await response.json();
+                
+                document.getElementById('totalCount').textContent = data.length;
+                document.getElementById('fakeCount').textContent = data.filter(item => item.is_fake).length;
+                document.getElementById('realCount').textContent = data.filter(item => !item.is_fake).length;
+                
+                const newsList = document.getElementById('newsList');
+                newsList.innerHTML = '';
+                
+                if (data.length === 0) {
+                    newsList.innerHTML = '<p>No training data yet. Add some examples above!</p>';
+                    return;
+                }
+                
+                data.forEach(item => {
+                    const div = document.createElement('div');
+                    div.className = `news-item ${item.is_fake ? 'fake-news' : 'real-news'}`;
+                    div.innerHTML = `
+                        <div style="display: flex; justify-content: between; align-items: start; gap: 1rem;">
+                            <div style="flex: 1;">
+                                <p style="margin: 0 0 0.5rem 0; font-weight: bold;">${item.is_fake ? '❌ FAKE NEWS' : '✅ REAL NEWS'}</p>
+                                <p style="margin: 0 0 0.5rem 0;">${item.text}</p>
+                                <small style="color: var(--text-secondary);">Category: ${item.category || 'general'} | Source: ${item.source || 'manual'}</small>
+                            </div>
+                            <button onclick="deleteNews(${item.id})" style="background: none; border: none; color: var(--text-secondary); cursor: pointer; padding: 0.5rem;" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                    newsList.appendChild(div);
+                });
+            } catch (error) {
+                console.error('Error loading training data:', error);
+            }
+        }
+
+        async function classifyNews(isFake) {
+            const text = document.getElementById('newsText').value.trim();
+            if (!text) {
+                alert('Please enter news text!');
+                return;
+            }
+
+            try {
+                const response = await fetch('/training-data', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        text: text,
+                        is_fake: isFake,
+                        category: 'general',
+                        source: 'manual'
+                    })
+                });
+
+                if (response.ok) {
+                    document.getElementById('newsText').value = '';
+                    loadTrainingData();
+                    alert('News added to training data! The AI will learn from this example.');
+                }
+            } catch (error) {
+                console.error('Error adding training data:', error);
+                alert('Error adding training data. Please try again.');
+            }
+        }
+
+        async function deleteNews(id) {
+            if (confirm('Delete this training example?')) {
+                try {
+                    await fetch(`/training-data/${id}`, { method: 'DELETE' });
+                    loadTrainingData();
+                } catch (error) {
+                    console.error('Error deleting training data:', error);
+                }
+            }
+        }
+
+        // Add sample data button for quick start
+        function addSampleData() {
+            const samples = [
+                { text: "Scientists discovered that drinking coffee cures all types of cancer instantly", is_fake: true },
+                { text: "Government is hiding evidence of alien civilizations visiting Earth", is_fake: true },
+                { text: "Lose 10kg in 3 days with this one simple trick doctors don't want you to know", is_fake: true },
+                { text: "According to WHO data, vaccination reduces disease transmission by 60-80%", is_fake: false },
+                { text: "NASA confirms successful Mars rover landing and transmission of first images", is_fake: false },
+                { text: "Federal Reserve announces 0.25% interest rate hike following economic review", is_fake: false }
+            ];
+
+            if (confirm('Add sample training data? This will help the AI learn faster.')) {
+                samples.forEach(async (sample, index) => {
+                    setTimeout(async () => {
+                        await fetch('/training-data', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                text: sample.text,
+                                is_fake: sample.is_fake,
+                                category: 'sample',
+                                source: 'sample data'
+                            })
+                        });
+                        if (index === samples.length - 1) {
+                            loadTrainingData();
+                            alert('Sample data added! The AI now has basic examples to learn from.');
+                        }
+                    }, index * 100);
+                });
+            }
+        }
+
+        // Add sample data button to the page
+        document.addEventListener('DOMContentLoaded', function() {
+            const statsDiv = document.querySelector('.training-stats');
+            const sampleButton = document.createElement('button');
+            sampleButton.innerHTML = '🎲 Add Sample Data';
+            sampleButton.onclick = addSampleData;
+            sampleButton.style.marginTop = '1rem';
+            sampleButton.style.padding = '0.5rem 1rem';
+            sampleButton.style.background = 'var(--primary-gradient)';
+            sampleButton.style.color = 'white';
+            sampleButton.style.border = 'none';
+            sampleButton.style.borderRadius = '0.5rem';
+            sampleButton.style.cursor = 'pointer';
+            statsDiv.appendChild(sampleButton);
+        });
+    </script>
+</body>
+</html>
