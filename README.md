@@ -1,8 +1,6 @@
 
 🛡️Fake-News-Detector-Ai-Project
 
-📚 Academic Project for "Digital Solution to a Social Problem" Course
-
 🎯 About the Project
 
 Interactive system for verifying news authenticity using artificial intelligence.
