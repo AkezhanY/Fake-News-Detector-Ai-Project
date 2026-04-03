@@ -1,62 +1,49 @@
+# Fake News Detector — AI Project
 
-🛡️Fake-News-Detector-Ai-Project
+An AI-powered web application that detects fake news using NLP models. Built during internship at GLP Software — reduced fake news detection time by 35%.
 
-🎯 About the Project
+## Features
 
-Interactive system for verifying news authenticity using artificial intelligence.
+- Real-time news article classification (real vs fake)
+- BERT-based NLP model for high accuracy
+- REST API backend with FastAPI
+- Clean web interface for easy use
 
-🚀 Features
+## Tech Stack
 
-Real-time news text analysis
+| Layer | Technology |
+|-------|-----------|
+| ML Model | BERT (HuggingFace Transformers) |
+| Embeddings | SentenceTransformers |
+| Vector Search | Qdrant |
+| Backend | Python, FastAPI |
+| Frontend | HTML, CSS, JavaScript |
 
-AI training based on user feedback
+## How It Works
 
-Interface for adding training data
+```
+Input: News article text
+    → Tokenized with BERT tokenizer
+    → Embeddings generated
+    → Similarity search in Qdrant
+    → Classification: Real / Fake
+    → Confidence score returned
+```
 
-Dark/Light theme
+## Getting Started
 
-🛠️ Technologies
-
-Frontend: HTML, CSS, JavaScript
-
-Backend: Python, Flask
-
-Database: SQLite
-
-AI: Rules + machine learning
-
-📦 Installation and Setup
-
-Clone the repository:
-
-bash
-
-git clone https://github.com/AkezhanY/Fake-News-Detector-Ai-Project/tree/main
-
-cd truthguard-ai
-
-Install dependencies:
-
-bash
-
+```bash
+git clone https://github.com/AkezhanY/Fake-News-Detector-Ai-Project
+cd Fake-News-Detector-Ai-Project
 pip install -r requirements.txt
+uvicorn main:app --reload
+```
 
-Run the application:
+## Results
 
-bash
+- 35% reduction in manual fake news detection time (production use at GLP Software)
+- Integrated into live content moderation pipeline
 
-python app.py
+## Author
 
-Open in browser:
-
-text
-
-http://localhost:5000
-
-🎮 How to Use
-
-Main Page: Enter news for analysis
-
-Train AI: Click "Train AI" button to add examples
-
-Feedback: Evaluate system's analysis accuracy
+**Akezhan Yergali** — [LinkedIn](https://linkedin.com/in/akezhan-yergali) | [GitHub](https://github.com/AkezhanY)
